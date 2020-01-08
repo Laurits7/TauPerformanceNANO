@@ -28,6 +28,7 @@ relExtraDY = 1.4
 extraOverCmsTextSize  = 0.8
 
 lumi_13TeV = ""
+lumi_14TeV = ""
 # lumi_13TeV = "2016"
 # lumi_13TeV = "Run 2016"
 # lumi_13TeV = "Run 2016, L = 37.0 fb^{-1}"
@@ -86,8 +87,10 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
         lumiText += " (7 TeV)"
     elif ( iPeriod==4 ):
         lumiText += lumi_13TeV
-#         lumiText += " (13 TeV)"
         lumiText += " 13 TeV"
+    elif ( iPeriod==5 ):
+        lumiText += lumi_14TeV
+        lumiText += " 14 TeV"
     elif ( iPeriod==7 ):
         if( outOfFrame ):lumiText += "#scale[0.85]{"
         lumiText += lumi_13TeV 
@@ -102,7 +105,7 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
     elif ( iPeriod==12 ):
         lumiText += "8 TeV"
             
-    print lumiText
+    #print lumiText
 
     latex = rt.TLatex()
     latex.SetNDC()

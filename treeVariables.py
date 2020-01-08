@@ -65,22 +65,31 @@ branches_tau = [
     Variable('tau_neutralIso'              , lambda ev : ev.Tau_neutralIso              ),
     Variable('tau_photonsOutsideSignalCone', lambda ev : ev.Tau_photonsOutsideSignalCone),
     Variable('tau_puCorr'                  , lambda ev : ev.Tau_puCorr                  ),
-    Variable('tau_rawAntiEle'              , lambda ev : ev.Tau_rawAntiEle              ),
+    #Variable('tau_rawAntiEle2015'          , lambda ev : ev.Tau_rawAntiEle              ),
+    Variable('tau_rawAntiEle'              , lambda ev : ev.Tau_rawAntiEle2018          ),
     Variable('tau_rawIso'                  , lambda ev : ev.Tau_rawIso                  ),
     Variable('tau_rawMVAnewDM2017v2'       , lambda ev : ev.Tau_rawMVAnewDM2017v2       ),
     Variable('tau_rawAntiEleCat'           , lambda ev : ev.Tau_rawAntiEleCat           ),
-    Variable('tau_idAntiEle'               , lambda ev : ev.Tau_idAntiEle               ),
-    Variable('tau_idAntiMu'                , lambda ev : ev.Tau_idAntiMu                ),
-    Variable('tau_idMVAnewDM2017v2'        , lambda ev : ev.Tau_idMVAnewDM2017v2        ),
+    #Variable('tau_idAntiEle2015'           , lambda ev : ev.Tau_idAntiEle               ), # againstElectronMVA62015
+    Variable('tau_idAntiEle'               , lambda ev : ev.Tau_idAntiEle2018           ), # againstElectronMVA6
+    Variable('tau_idAntiMu'                , lambda ev : ev.Tau_idAntiMu                ), # againstMuon
+    Variable('tau_idMVAnewDM2017v2'        , lambda ev : ev.Tau_idMVAnewDM2017v2        ), # IsolationMVArun2v1DBnewDMwLT2017v2
     Variable('tau_genPartIdx'              , lambda ev : ev.Tau_genPartIdx              ),
     Variable('tau_genPartFlav'             , lambda ev : ev.Tau_genPartFlav             ),
 
-    Variable('tau_rawDeepTau2017v2VSjet'   , lambda ev : ev.Tau_rawDeepTau2017v2VSjet   ),
-    Variable('tau_rawDeepTau2017v2VSmu'    , lambda ev : ev.Tau_rawDeepTau2017v2VSmu    ),
-    Variable('tau_rawDeepTau2017v2VSe'     , lambda ev : ev.Tau_rawDeepTau2017v2VSe     ),
-    Variable('tau_idDeepTau2017v2VSjet'    , lambda ev : ev.Tau_idDeepTau2017v2VSjet    ),
-    Variable('tau_idDeepTau2017v2VSmu'     , lambda ev : ev.Tau_idDeepTau2017v2VSmu     ),
-    Variable('tau_idDeepTau2017v2VSe'      , lambda ev : ev.Tau_idDeepTau2017v2VSe      ),
+    #Variable('tau_rawDeepTau2017v2VSjet'   , lambda ev : ev.Tau_rawDeepTau2017v2VSjet   ),
+    #Variable('tau_rawDeepTau2017v2VSmu'    , lambda ev : ev.Tau_rawDeepTau2017v2VSmu    ),
+    #Variable('tau_rawDeepTau2017v2VSe'     , lambda ev : ev.Tau_rawDeepTau2017v2VSe     ),
+    #Variable('tau_idDeepTau2017v2VSjet'    , lambda ev : ev.Tau_idDeepTau2017v2VSjet    ),
+    #Variable('tau_idDeepTau2017v2VSmu'     , lambda ev : ev.Tau_idDeepTau2017v2VSmu     ),
+    #Variable('tau_idDeepTau2017v2VSe'      , lambda ev : ev.Tau_idDeepTau2017v2VSe      ),
+
+    Variable('tau_rawDeepTau2017v2p1VSjet'   , lambda ev : ev.Tau_rawDeepTau2017v2p1VSjet   ),
+    Variable('tau_rawDeepTau2017v2p1VSmu'    , lambda ev : ev.Tau_rawDeepTau2017v2p1VSmu    ),
+    Variable('tau_rawDeepTau2017v2p1VSe'     , lambda ev : ev.Tau_rawDeepTau2017v2p1VSe     ),
+    Variable('tau_idDeepTau2017v2p1VSjet'    , lambda ev : ev.Tau_idDeepTau2017v2p1VSjet    ),
+    Variable('tau_idDeepTau2017v2p1VSmu'     , lambda ev : ev.Tau_idDeepTau2017v2p1VSmu     ),
+    Variable('tau_idDeepTau2017v2p1VSe'      , lambda ev : ev.Tau_idDeepTau2017v2p1VSe      ),
 
     Variable('tau_idDecayMode'             , lambda ev : ev.Tau_idDecayMode             ),
     Variable('tau_idDecayModeNewDMs'       , lambda ev : ev.Tau_idDecayModeNewDMs       ),
@@ -88,18 +97,18 @@ branches_tau = [
 
 ##########################################################################################
 # Add more branches, most of them are not recommended isolation discriminators
-# branches_tau += [
-#     Variable('tau_jetIdx'                  , lambda ev : ev.Tau_jetIdx                  ),
-#     Variable('tau_rawIsodR03'              , lambda ev : ev.Tau_rawIsodR03              ),
-#     Variable('tau_rawMVAoldDM'             , lambda ev : ev.Tau_rawMVAoldDM             ),
-#     Variable('tau_rawMVAoldDM2017v1'       , lambda ev : ev.Tau_rawMVAoldDM2017v1       ),
-#     Variable('tau_rawMVAoldDM2017v2'       , lambda ev : ev.Tau_rawMVAoldDM2017v2       ),
-#     Variable('tau_rawMVAoldDMdR032017v2'   , lambda ev : ev.Tau_rawMVAoldDMdR032017v2   ),
-#     Variable('tau_idMVAoldDM'              , lambda ev : ev.Tau_idMVAoldDM              ),
-#     Variable('tau_idMVAoldDM2017v1'        , lambda ev : ev.Tau_idMVAoldDM2017v1        ),
-#     Variable('tau_idMVAoldDM2017v2'        , lambda ev : ev.Tau_idMVAoldDM2017v2        ),
-#     Variable('tau_idMVAoldDMdR032017v2'    , lambda ev : ev.Tau_idMVAoldDMdR032017v2    ),
-# ] 
+branches_tau += [
+    Variable('tau_jetIdx'                  , lambda ev : ev.Tau_jetIdx                  ),
+    Variable('tau_rawIsodR03'              , lambda ev : ev.Tau_rawIsodR03              ),
+    Variable('tau_rawMVAoldDM'             , lambda ev : ev.Tau_rawMVAoldDM             ),
+    Variable('tau_rawMVAoldDM2017v1'       , lambda ev : ev.Tau_rawMVAoldDM2017v1       ),
+    Variable('tau_rawMVAoldDM2017v2'       , lambda ev : ev.Tau_rawMVAoldDM2017v2       ),
+    Variable('tau_rawMVAoldDMdR032017v2'   , lambda ev : ev.Tau_rawMVAoldDMdR032017v2   ),
+    Variable('tau_idMVAoldDM'              , lambda ev : ev.Tau_idMVAoldDM              ), # IsolationMVArun2v1DBoldDMwLT2015
+    Variable('tau_idMVAoldDM2017v1'        , lambda ev : ev.Tau_idMVAoldDM2017v1        ), # IsolationMVArun2v1DBoldDMwLT
+    Variable('tau_idMVAoldDM2017v2'        , lambda ev : ev.Tau_idMVAoldDM2017v2        ), # IsolationMVArun2v1DBoldDMwLT2017v2
+    Variable('tau_idMVAoldDMdR032017v2'    , lambda ev : ev.Tau_idMVAoldDMdR032017v2    ), # IsolationMVArun2v1DBdR03oldDMwLT2017v2
+] 
 
 branches_gen = [
     Variable('tau_gen_pt'                  , lambda ev : ev.GenVisTau_pt                ),
@@ -117,4 +126,25 @@ branches_jet = [
     Variable('tau_jet_mass'                , lambda ev : ev.Jet_mass                    ),
 ]
 
-branches_all = branches_event + branches_tau + branches_gen + branches_jet
+branches_ele = [
+    Variable('tau_ele_pt'                  , lambda ev : ev.GenPart_pt                      ),
+    Variable('tau_ele_eta'                 , lambda ev : ev.GenPart_eta                     ),
+    Variable('tau_ele_phi'                 , lambda ev : ev.GenPart_phi                     ),
+    Variable('tau_ele_mass'                , lambda ev : ev.GenPart_mass                    ),
+]
+
+branches_mu = [
+    Variable('tau_mu_pt'                  , lambda ev : ev.GenPart_pt                      ),
+    Variable('tau_mu_eta'                 , lambda ev : ev.GenPart_eta                     ),
+    Variable('tau_mu_phi'                 , lambda ev : ev.GenPart_phi                     ),
+    Variable('tau_mu_mass'                , lambda ev : ev.GenPart_mass                    ),
+]
+
+branches_genjet = [
+    Variable('tau_jet_pt'                  , lambda ev : ev.GenJet_pt                      ),
+    Variable('tau_jet_eta'                 , lambda ev : ev.GenJet_eta                     ),
+    Variable('tau_jet_phi'                 , lambda ev : ev.GenJet_phi                     ),
+    Variable('tau_jet_mass'                , lambda ev : ev.GenJet_mass                    ),
+]
+
+branches_all = branches_event + branches_tau + branches_gen + branches_jet + branches_ele + branches_mu + branches_genjet
