@@ -8,6 +8,7 @@ from tau_performance.tools import general
 
 @hydra.main(config_path='../config', config_name='config')
 def main(cfg: DictConfig) -> None:
+    os.makedirs(cfg.output_dir, exist_ok=True)
     if cfg.do_eff:
         file_path = cfg.eff_file.path
         tree_name = cfg.eff_file.tree

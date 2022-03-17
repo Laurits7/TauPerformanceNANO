@@ -1,5 +1,6 @@
 eff_file:
-  path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
+  path: "/home/laurits/tmp/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
+  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
   tree: "Events"
 # fakes_file:
 #   path: ???

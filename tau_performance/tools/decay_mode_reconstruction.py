@@ -97,8 +97,7 @@ def decay_mode_reconstruction(cfg: DictConfig) -> None:
 
     Args:
         cfg: omegaconf.DictConfig
-            The configuration. Branch names are inferred from that.
-
+            The configuration for plotting
     Returns:
         None
     """
