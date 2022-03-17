@@ -1,4 +1,5 @@
 hydra-core
 uproot
-awkward-array
+awkward
 mplhep
+sklearn
