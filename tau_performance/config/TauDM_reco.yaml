@@ -1,0 +1,20 @@
+TauDM_reco:
+  dm_categories:
+    OneProng0PiZero:
+      status: 0
+      latex: "\\pi^{\\pm}"
+    OneProng1PiZero:
+      status: 1
+      latex: "\\pi^{\\pm}\\pi^{0}"
+    OneProng2PiZero:
+      status: 2
+      latex: "\\pi^{\\pm}\\pi^{0}\\pi^{0}"
+    ThreeProng0PiZero:
+      status: 10
+      latex: "\\pi^{\\pm}\\pi^{\\mp}\\pi^{\\pm}"
+    ThreeProng1PiZero:
+      status: 11
+      latex: "\\pi^{\\pm}\\pi^{\\mp}\\pi^{\\pm}\\pi^{0}"
+    Other:
+      status: 15
+      latex: "Other"

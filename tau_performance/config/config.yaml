@@ -1,0 +1,30 @@
+eff_file:
+  path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
+  tree: "Events"
+# fakes_file:
+#   path: ???
+#   tree: "Events"
+variables:
+  genTau: GenVisTau
+  recoJet: Jet
+  genParticle: GenPart
+  genJet: GenJet
+comparison_tau: tallinnTau
+output_dir: /home/laurits/tmp
+do_eff: true
+do_fake: false
+fake_matching:
+  recoJets: false # Make sure this is not set to true when do_eff is true
+  fakeEle: false # Make sure this is not set to true when do_eff is true
+  fakeMu: false # Make sure this is not set to true when do_eff is true
+  fakeJet: false
+quality_cuts:
+  genTau:
+    pt: 20
+    eta: 2.3
+defaults:
+    - TauID_eff
+    - TauDM_reco
+    - matching
+    - allVariables
+    - _self_
