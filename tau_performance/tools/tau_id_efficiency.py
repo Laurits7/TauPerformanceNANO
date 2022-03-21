@@ -65,9 +65,9 @@ def create_numerators(
         }
     elif tau_id_type == 'dm':
         mask = {
-            "Loose": (events[id_key] >= cfg.TauID_eff.tau_ids.dm.WPs.Loose) & base_mask,
-            "Medium": (events[id_key] >= cfg.TauID_eff.tau_ids.dm.WPs.Medium) & base_mask,
-            "Tight": (events[id_key] >= cfg.TauID_eff.tau_ids.dm.WPs.Tight) & base_mask
+            "DM": (events[id_key] == 1) & base_mask
+            # "Medium": (events[id_key] >= cfg.TauID_eff.tau_ids.dm.WPs.Medium) & base_mask,
+            # "Tight": (events[id_key] >= cfg.TauID_eff.tau_ids.dm.WPs.Tight) & base_mask
         }
     else:
         raise NotImplementedError(f"TauID '{tau_id_type}' is not implemented")
@@ -105,7 +105,7 @@ def create_efficiency_histograms(
     """
     efficiency_histograms = {}
     if var_type == 'gen':
-        tau_var_name = f"{cfg.variables.genTau}_{tau_var.name}"
+        tau_var_name = f"{cfg.genTau}_{tau_var.name}"
     elif var_type == 'reco':
         tau_var_name = f"{cfg.comparison_tau}_{tau_var.name}"
     else:
@@ -158,7 +158,7 @@ def plot_efficiency_histogram(
             bins[:-1]+ 0.5*(bins[1:] - bins[:-1]),
             entry[0], label=wp_key, marker="v", markersize=12, lw=3)
     if var_type == 'gen':
-        prefix = f"{cfg.variables.genTau}_"
+        prefix = f"{cfg.genTau}_"
     elif var_type == 'reco':
         prefix = f"{cfg.comparison_tau}_"
     else:
@@ -166,10 +166,10 @@ def plot_efficiency_histogram(
     plt.xlabel(f"{prefix}{tau_var.name}", fontdict={'size': 20})
     plt.ylabel("Efficiency", fontdict={'size': 20})
     plt.xlim(tau_var.x_range)
-    plt.legend()
     plt.grid()
     box = ax.get_position()
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    if not "DM" in list(efficiency_histograms.keys()):
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
     output_path = os.path.join(output_dir, f"{tau_var.name}_{iso_tau_id}.png")
     plt.savefig(output_path, bbox_inches='tight')
     plt.close('all')
@@ -242,12 +242,13 @@ def eval_var_efficiencies(
         plot_var_efficiencies(
                                 events, denominator, numerators,
                                 tau_var, var_type, cfg, iso_tau_id)
-    for dm_tau_id in cfg.TauID_eff.tau_ids.dm.ids:
-        dm_tau_key = f"{cfg.comparison_tau}_{iso_tau_id}"
+    for dm_tau_id in cfg.TauID_eff.tau_ids.dm:
+        dm_tau_key = f"{cfg.comparison_tau}_{dm_tau_id}"
         numerators = create_numerators(dm_tau_key, events, "dm", cfg)
         plot_var_efficiencies(
                                 events, denominator, numerators,
                                 tau_var, var_type, cfg, dm_tau_id)
+
 
 def plot_tau_id_efficiency(cfg: DictConfig) -> None:
     """ Collects all functions in order to estimate the tau id efficiency

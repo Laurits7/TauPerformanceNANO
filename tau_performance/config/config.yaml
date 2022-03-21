@@ -1,24 +1,22 @@
 eff_file:
   path: "/home/laurits/tmp/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
-  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
+  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_ggH_htt_DNN_2022Mar16_NANOAODSIM.root"
+  sample_name: "ggH_htt"
   tree: "Events"
-# fakes_file:
-#   path: ???
-#   tree: "Events"
-variables:
-  genTau: GenVisTau
-  recoJet: Jet
-  genParticle: GenPart
+fakes_file:
+  sample_name: "qcd"
+  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_qcd_DNN_2022Mar16_NANOAODSIM.root"
+  path: "/home/laurits/tmp/produceTallinnTaus_qcd_DNN_2022Mar20_NANOAODSIM.root"
+  tree: "Events"
+genTau: GenVisTau
+fakes:
+  genElectron: GenPart
+  genMuon: GenPart
   genJet: GenJet
 comparison_tau: tallinnTau
 output_dir: /home/laurits/tmp
 do_eff: true
 do_fake: false
-fake_matching:
-  recoJets: false # Make sure this is not set to true when do_eff is true
-  fakeEle: false # Make sure this is not set to true when do_eff is true
-  fakeMu: false # Make sure this is not set to true when do_eff is true
-  fakeJet: false
 quality_cuts:
   genTau:
     pt: 20

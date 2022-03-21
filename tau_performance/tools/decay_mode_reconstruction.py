@@ -84,7 +84,7 @@ def extract_matched_tau_decay_modes(
             The decay modes of the comparison tau
     """
     comparison_tau_dms = events[f"{cfg.comparison_tau}_decayMode"].to_numpy()
-    truth_tau_dms = events[f"{cfg.variables.genTau}_status"].to_numpy()
+    truth_tau_dms = events[f"{cfg.genTau}_status"].to_numpy()
     interest_mask = comparison_tau_dms != -999
     truth_dms = list(truth_tau_dms[interest_mask])
     comparison_dms = list(comparison_tau_dms[interest_mask])

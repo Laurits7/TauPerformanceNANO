@@ -32,16 +32,8 @@ TauID_eff:
         Medium: 2
         Tight: 4
     dm: # Need correct WP values, currently only fillers
-      ids:
-        - idDecayModeNewDMs
-      WPs:
-        Loose: 0
-        Medium: 0.8
-        Tight: 0.9
+      - idDecayModeNewDMs
   numerators:
-    # dm:
-    #   - name: "withoutTwoProng"
-    #   - name: "withTwoProng"
     tau:
       pt: 20
       eta: 2.3

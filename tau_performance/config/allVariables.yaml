@@ -26,7 +26,7 @@ allVariables:
     - idIso
     - idChargedIso
     - idDecayModeNewDMs
-  gen:
+  genTau:
     - pt
     - eta
     - phi
@@ -38,12 +38,12 @@ allVariables:
     - eta
     - phi
     - mass
-  el:
+  genElectron:
     - GenPart_pt
     - GenPart_eta
     - GenPart_phi
     - GenPart_mass
-  mu:
+  genMuon:
     - GenPart_pt
     - GenPart_eta
     - GenPart_phi

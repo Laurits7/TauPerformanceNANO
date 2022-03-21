@@ -1,4 +1,4 @@
-""" Tools for matching particles in a nTuple """
+""" Tools for matching particles objects to taus """
 import numpy as np
 import awkward
 from omegaconf import DictConfig
@@ -6,6 +6,18 @@ from collections import Counter
 
 
 def deltaPhi(phi1: float, phi2: float) -> float:
+    """ Calculates the difference in azimuthal angle between two particles
+
+    Args:
+        phi1 : float
+            The azimuthal angle of the first particle
+        phi2: float
+            The azimuthal angle of the second particle
+
+    Returns:
+        dPhi : float
+            The difference in azimuthal angle.
+    """
     phi = np.abs(phi1 - phi2)
     if phi <= np.pi:
         return phi
@@ -14,49 +26,26 @@ def deltaPhi(phi1: float, phi2: float) -> float:
 
 
 def deltaR(eta1: float, phi1: float, eta2: float, phi2: float) -> float:
-    """ Calculates the angular distance"""
+    """ Calculates the angular separation between two particles given the
+    pseudorapidities and azimuthal angles of both particles
+
+    Args:
+        eta1 : float
+            The pseudorapidity of the first particle
+        phi1 : float
+            The azimuthal angle of the first particle
+        eta2 : float
+            The pseudorapidity of the second particle
+        phi2: float
+            The azimuthal angle of the second particle
+
+    Returns:
+        deltaR : float
+            The angular separation between two particles.
+    """
     deta = eta1 - eta2
     dphi = deltaPhi(phi1, phi2)
     return np.hypot(deta, dphi)
-
-
-def get_ref_value(
-        part_idx: int,
-        event: awkward.Array,
-        variable: str,
-        cfg: DictConfig) -> float:
-    """ Gets the reference value of a particle
-
-    Args:
-        part_idx : int
-            Index of the particle in the event
-        event: awkward.Array
-            The event entry with all the variables
-        variable: str
-            Name of the variable the reference value is returned, e.g. "eta"
-        cfg: omegaconf.DictConfig
-            The configuration. Branch names are inferred from that.
-
-    Returns:
-        ref_value : float
-            The reference value queried
-    """
-    if cfg.do_eff:
-        variable_full_name = f"{cfg.variables.genTau}_{variable}"
-    elif cfg.do_fake:
-        if cfg.fake_matching.recoJets:
-            variable_full_name = f"{cfg.variables.recoJet}_{variable}"
-        elif cfg.fake_matching.fakeEle or cfg.fake_matching.fakeMu:
-            variable_full_name = f"{cfg.variables.genParticle}_{variable}"
-        elif cfg.fake_matching.fakeJet:
-            variable_full_name = f"{cfg.variables.genJet}_{variable}"
-        else:
-            raise ValueError(
-                "Fake matching was requested but no fake matching scenario was chosen")
-    else:
-        raise ValueError("No scenario (efficiency/fake rate) was chosen")
-    ref_value = event[variable_full_name][part_idx]
-    return ref_value
 
 
 def check_for_double_count(matched_objects: dict) -> tuple[int, list[int]]:
@@ -92,6 +81,7 @@ def calculate_conflicting_obj_distances(
         objects_sharing_tau: list[int],
         matched_objects: dict,
         event: awkward.Array,
+        ref_obj: str,
         cfg: DictConfig) -> dict:
     """ Calculates the distances of the conflicting objects to the taus
 
@@ -102,6 +92,8 @@ def calculate_conflicting_obj_distances(
             The object indices with matching tau index
         event: awkward.Array
             The event entry with all the variables
+        ref_obj : str
+            The object comparison tau to match to.
         cfg: omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
 
@@ -117,8 +109,8 @@ def calculate_conflicting_obj_distances(
             distances[distance_key] = deltaR(
                 event["%s_eta" %cfg.comparison_tau][tau_idx],
                 event["%s_phi" %cfg.comparison_tau][tau_idx],
-                get_ref_value(obj_idx, event, "eta", cfg),
-                get_ref_value(obj_idx, event, "phi", cfg)
+                event[f"{ref_obj}_eta"][obj_idx],
+                event[f"{ref_obj}_phi"][obj_idx]
             )
     return distances
 
@@ -127,6 +119,7 @@ def resolve_matching_conflicts(
         objects_sharing_tau: list[int],
         matched_objects: dict,
         event: awkward.Array,
+        ref_obj: str,
         cfg: DictConfig) -> dict:
     """ Resolves the conflicts of objects that share the same tau.
 
@@ -137,34 +130,39 @@ def resolve_matching_conflicts(
             The object indices with matching tau index
         event: awkward.Array
             The event entry with all the variables
+        ref_obj : str
+            The object comparison tau to match to.
         cfg: omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
 
     Returns:
-        matched_objects : dict
+        matched_objects_ : dict
             The matched taus to the requested objects
 """
+    matched_objects_ = matched_objects.copy()
     distances = calculate_conflicting_obj_distances(
-                            objects_sharing_tau, matched_objects, event, cfg)
+                    objects_sharing_tau, matched_objects_, event, ref_obj, cfg)
     for obj_idx in objects_sharing_tau:
-        del matched_objects[obj_idx]
+        del matched_objects_[obj_idx]
     while distances != {}:
         shortest_distance_key = min(distances, key=distances.get)
         obj_idx = int(shortest_distance_key.split("_")[0])
         tau_idx = int(shortest_distance_key.split("_")[1])
-        matched_objects[obj_idx] = tau_idx
+        matched_objects_[obj_idx] = tau_idx
         for_removal = []
         for distance_key in distances.keys():
-            if distance_key.startswith(str(obj_idx)) or distance_key.endswith(str(tau_idx)):
+            obj_part, tau_part = distance_key.split("_")
+            if (obj_part == str(obj_idx)) or (tau_part == str(tau_idx)):
                 for_removal.append(distance_key)
         for distance_key in for_removal:
             del distances[distance_key]
-    return matched_objects  # Is return correct here? Is the change maybe made "in-place"
+    return matched_objects_
 
 
 def match_taus_to_refs(
         reference_obj_idxs: list[int],
         event: awkward.Array,
+        ref_obj: str,
         cfg: DictConfig) -> dict:
     """ Matches taus to the reference objects and reports the double count
     after the matching.
@@ -174,6 +172,8 @@ def match_taus_to_refs(
             The indices of the reference objects to which to match
         event: awkward.Array
             The event entry with all the variables
+        ref_obj : str
+            The object comparison tau to match to.
         cfg: omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
 
@@ -189,8 +189,8 @@ def match_taus_to_refs(
             dR = deltaR(
                 event["%s_eta" %cfg.comparison_tau][tau_idx],
                 event["%s_phi" %cfg.comparison_tau][tau_idx],
-                get_ref_value(obj_idx, event, "eta", cfg),
-                get_ref_value(obj_idx, event, "phi", cfg)
+                event[f"{ref_obj}_eta"][obj_idx],
+                event[f"{ref_obj}_phi"][obj_idx]
             )
             if dR > dR_max:
                 continue
@@ -201,5 +201,5 @@ def match_taus_to_refs(
     double_count, objects_sharing_tau = check_for_double_count(matched_objects)
     if double_count > 0:
         matched_objects = resolve_matching_conflicts(
-            objects_sharing_tau, matched_objects, event, cfg)
+            objects_sharing_tau, matched_objects, event, ref_obj, cfg)
     return matched_objects

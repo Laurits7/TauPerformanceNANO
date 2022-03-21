@@ -22,13 +22,15 @@ def load_events(file_path: str, tree_name: str) -> awkward.Array:
     return arrays
 
 
-def construct_var_names(cfg: DictConfig) -> list:
+def construct_var_names(cfg: DictConfig, obj_type: str) -> list:
     """ Constructs all variable names that are to be loaded from the input
     .root file
 
     Args:
-        cfg: omegaconf.DictConfig
+        cfg : omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
+        obj_type : str
+            Type of the main truth comparison object
 
     Returns:
         all_vars : list
@@ -41,8 +43,8 @@ def construct_var_names(cfg: DictConfig) -> list:
         for var in cfg.allVariables.tau:
             tau_var = "%s_%s" %(cfg.comparison_tau, var)
             all_vars.append(tau_var)
-        for var in cfg.allVariables.gen:
-            gen_var = "%s_%s" %(cfg.variables.genTau, var)
+        for var in cfg.allVariables[obj_type]: # need to be changed to the approptiate object
+            gen_var = "%s_%s" %(cfg.genTau, var)
             all_vars.append(gen_var)
     else:
         raise NotImplementedError
