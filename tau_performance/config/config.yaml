@@ -1,17 +1,17 @@
 eff_file:
-  path: "/home/laurits/tmp/produceTallinnTaus_NANOAODSIM_2022Mar14.root"
-  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_ggH_htt_DNN_2022Mar16_NANOAODSIM.root"
+  path: "/home/laurits/tmp/produceTallinnTaus_ggH_htt_DNN_2022Mar18_NANOAODSIM.root"
+  # path: "/hdfs/local/veelken/gnnTauReco/produceTallinnTaus_ggH_htt_DNN_2022Mar18_NANOAODSIM"
   sample_name: "ggH_htt"
   tree: "Events"
 fakes_file:
   sample_name: "qcd"
-  # path: "/home/veelken/gnnTauReco/CMSSW_12_1_0/src/TallinnTauTag/RecoTau/test/produceTallinnTaus_qcd_DNN_2022Mar16_NANOAODSIM.root"
-  path: "/home/laurits/tmp/produceTallinnTaus_qcd_DNN_2022Mar20_NANOAODSIM.root"
+  # path: "/hdfs/local/veelken/gnnTauReco/produceTallinnTaus_qcd_DNN_2022Mar18_NANOAODSIM.root"
+  path: "/home/laurits/tmp/produceTallinnTaus_qcd_DNN_2022Mar18_NANOAODSIM.root"
   tree: "Events"
 genTau: GenVisTau
 fakes:
-  genElectron: GenPart
-  genMuon: GenPart
+  # genElectron: GenPart
+  # genMuon: GenPart
   genJet: GenJet
 comparison_tau: tallinnTau
 output_dir: /home/laurits/tmp
@@ -23,6 +23,7 @@ quality_cuts:
     eta: 2.3
 defaults:
     - TauID_eff
+    - TauID_fake
     - TauDM_reco
     - matching
     - allVariables

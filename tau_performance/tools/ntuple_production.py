@@ -153,7 +153,7 @@ def fill_fake_obj_ntuple(
     all_vars = general.construct_var_names(cfg, fake_type)
     fill_entries = []
     for event in events:
-        good_gen_taus = pick_suitable_ref_objects(event, cfg.genTau, ref_type, cfg)
+        good_gen_taus = pick_suitable_ref_objects(event, cfg.genTau, 'genTau', cfg)
         good_ref_objects = pick_suitable_ref_objects(
                                 event, cfg.genTau, cfg.fakes[fake_type], cfg)
         matched_ref_objects = pm.match_taus_to_refs(
@@ -165,15 +165,17 @@ def fill_fake_obj_ntuple(
             for info_branch in cfg.allVariables.info:
                 fill_entry[info_branch] = event[info_branch]
             for obj_var in cfg.allVariables[fake_type]:
-                fill_entry[obj_var] = event[f"{cfg.fakes[fake_type]}_{obj_var}"][ref_idx]
+                fill_entry[f"{cfg.fakes[fake_type]}_{obj_var}"] = event[f"{cfg.fakes[fake_type]}_{obj_var}"][ref_idx]
             if ref_idx in matched_ref_objects:
                 matched_tau_idx = matched_ref_objects[ref_idx]
                 for tau_var in cfg.allVariables.tau:
-                    fill_entry[tau_var] = event[f"{cfg.comparison_tau}_{fill_entry}"]
+                    fill_entry[f"{cfg.comparison_tau}_{tau_var}"] = event[f"{cfg.comparison_tau}_{tau_var}"][matched_tau_idx]
                 if matched_tau_idx in matched_gen_taus.values():
-                    gen_tau_idx = list(matched_gen_taus.keys())[
-                                        list(d.values()).index(matched_tau_idx)]
-                    for gen_branch in cfg.allVariables.genTau:
+                    gen_tau_idx = list(
+                        matched_gen_taus.keys())[list(
+                            matched_gen_taus.values()
+                        ).index(matched_tau_idx)]
+                    for gen_var in cfg.allVariables.genTau:
                         gen_key = f"{cfg.genTau}_{gen_var}"
                         fill_entry[gen_key] = event[gen_key][gen_tau_idx]
             fill_entries.append(fill_entry)
@@ -197,5 +199,5 @@ def fill_all_fake_ntuples(
     Returns:
         None
     """
-    for fake_info in cfg.fakes:
+    for fake_type in cfg.fakes:
         fill_fake_obj_ntuple(events, fake_type, cfg)

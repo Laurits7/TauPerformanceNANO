@@ -1,7 +1,7 @@
 import hydra
 from omegaconf import DictConfig
 from tau_performance.tools import decay_mode_reconstruction as dm
-from tau_performance.tools import tau_id_efficiency as id_eff
+from tau_performance.tools import tau_id_efficiency2 as id_eff
 import os
 
 

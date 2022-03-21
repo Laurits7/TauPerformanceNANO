@@ -37,15 +37,16 @@ def construct_var_names(cfg: DictConfig, obj_type: str) -> list:
             Variables that are to be read from the .root file
     """
     all_vars = []
-    if cfg.do_eff:
-        for var in cfg.allVariables.info:
-            all_vars.append(var)
-        for var in cfg.allVariables.tau:
-            tau_var = "%s_%s" %(cfg.comparison_tau, var)
-            all_vars.append(tau_var)
-        for var in cfg.allVariables[obj_type]: # need to be changed to the approptiate object
-            gen_var = "%s_%s" %(cfg.genTau, var)
-            all_vars.append(gen_var)
-    else:
-        raise NotImplementedError
+    for var in cfg.allVariables.info:
+        all_vars.append(var)
+    for var in cfg.allVariables.tau:
+        tau_var = "%s_%s" %(cfg.comparison_tau, var)
+        all_vars.append(tau_var)
+    for var in cfg.allVariables.genTau: # need to be changed to the approptiate object
+        gen_var = "%s_%s" %(cfg.genTau, var)
+        all_vars.append(gen_var)
+    if obj_type != 'genTau':
+        for var in cfg.allVariables[obj_type]:
+            fake_var = f"{cfg.fakes[obj_type]}_{var}"
+            all_vars.append(fake_var)
     return all_vars

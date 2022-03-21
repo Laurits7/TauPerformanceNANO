@@ -1,6 +1,6 @@
 TauID_eff:
   data_file:
-    sample_name: theSampleName
+    sample_name: ggH_htt
     path: tauID_eff.root
     tree_path: "Events"
   variables:
@@ -22,20 +22,38 @@ TauID_eff:
       - name: Pileup_nTrueInt
         x_range: [50, 80]
         bins: [52, 55, 58, 61, 64, 67, 70, 73, 76, 79]
-  tau_ids:
-    iso:
-      ids:
-        - idIso
-        - idChargedIso
-      WPs:
-        Loose: 1
-        Medium: 2
-        Tight: 4
-    dm: # Need correct WP values, currently only fillers
-      - idDecayModeNewDMs
+  denominators:
+    Base: "pt > 20 && |eta| < 2.3"
   numerators:
-    tau:
-      pt: 20
-      eta: 2.3
-  denominators: ""
+    Base: "pt > 20 && |eta| < 2.3"
+    idIso:
+      Loose: "idIso > 0.5"
+      Medium: "idIso > 1.5"
+      Tight: "idIso > 3.5"
+    idChargedIso:
+      Loose: "idChargedIso > 0.5"
+      Medium: "idChargedIso > 1.5"
+      Tight: "idChargedIso > 3.5"
+    idDecayModeNewDMs:
+      Default: "idDecayModeNewDMs > 0.5"
+    firstNum:
+      Default: idLeadTkFinding > 0.5
+    secondNum:
+      Default: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5"
+    thirdNum:
+      Loose: "idLeadTkFinding > 0.5 && idChargedIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idChargedIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idChargedIso > 3.5"
+    fourthNum:
+      Loose: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 3.5"
+    fifthNum:
+      Loose: "idLeadTkFinding > 0.5 && idIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idIso > 3.5"
+    sixthNum:
+      Loose: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 3.5"
 

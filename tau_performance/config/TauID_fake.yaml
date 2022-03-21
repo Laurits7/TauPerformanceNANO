@@ -1,4 +1,5 @@
 TauID_fake:
   data_file:
+    sample_name: QCD
     path: tauID_fake.root
     tree_path: "Events"
