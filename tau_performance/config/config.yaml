@@ -1,17 +1,19 @@
 eff_file:
   path: "/home/laurits/tmp/produceTallinnTaus_ggH_htt_DNN_2022Mar18_NANOAODSIM.root"
+  # path: "/home/laurits/tmp/produceTallinnTaus_ggH_htt_gnn_2022Mar20_NANOAODSIM.root"
   # path: "/hdfs/local/veelken/gnnTauReco/produceTallinnTaus_ggH_htt_DNN_2022Mar18_NANOAODSIM"
   sample_name: "ggH_htt"
   tree: "Events"
 fakes_file:
-  sample_name: "qcd"
+  sample_name: "QCD"
   # path: "/hdfs/local/veelken/gnnTauReco/produceTallinnTaus_qcd_DNN_2022Mar18_NANOAODSIM.root"
   path: "/home/laurits/tmp/produceTallinnTaus_qcd_DNN_2022Mar18_NANOAODSIM.root"
+  # path: "/home/laurits/tmp/produceTallinnTaus_qcd_gnn_2022Mar20_NANOAODSIM.root"
   tree: "Events"
 genTau: GenVisTau
 fakes:
-  # genElectron: GenPart
-  # genMuon: GenPart
+  genElectron: GenPart
+  genMuon: GenPart
   genJet: GenJet
 comparison_tau: tallinnTau
 output_dir: /home/laurits/tmp

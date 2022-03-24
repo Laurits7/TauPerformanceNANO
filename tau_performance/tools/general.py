@@ -45,6 +45,9 @@ def construct_var_names(cfg: DictConfig, obj_type: str) -> list:
     for var in cfg.allVariables.genTau: # need to be changed to the approptiate object
         gen_var = "%s_%s" %(cfg.genTau, var)
         all_vars.append(gen_var)
+    for var in cfg.allVariables.jet:
+        jet_var = f"Jet_{var}"
+        all_vars.append(jet_var)
     if obj_type != 'genTau':
         for var in cfg.allVariables[obj_type]:
             fake_var = f"{cfg.fakes[obj_type]}_{var}"

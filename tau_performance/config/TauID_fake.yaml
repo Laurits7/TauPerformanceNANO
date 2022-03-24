@@ -1,5 +1,51 @@
 TauID_fake:
-  data_file:
-    sample_name: QCD
-    path: tauID_fake.root
-    tree_path: "Events"
+  data_files:
+    QCD:
+      path: QCD_tauID_fake.root
+      tree_path: "Events"
+    ggH_htt:
+      path: ggH_htt_tauID_fake.root
+      tree_path: "Events"
+  variables:
+    genTau:
+      - name: pt
+        x_range: [18.0, 400.1]
+        bins: [19.0, 22.0, 24.0, 26.0, 28.0, 30.0, 35.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 150.0, 200.0, 400.0]
+      # - name: eta
+      #   x_range: [-2.6001, 2.6001]
+      #   bins: [-2.4, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4]
+      # - name: phi
+      #   x_range: [-3.2001, 3.2001]
+      #   bins: [-3.2, -2.8, -2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0.0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2]
+    recoTau:
+      - name: rawIso
+        x_range: [0, 10.0001]
+        bins: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    other:
+      - name: Pileup_nTrueInt
+        x_range: [50, 80]
+        bins: [52, 55, 58, 61, 64, 67, 70, 73, 76, 79]
+  numerators:
+    Base: "pt >= 20 && |eta| < 2.3"
+    idLeadTkFinding_bare:
+      Default: idLeadTkFinding > 0.5
+    idDecayModeNewDMs:
+      Default: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5"
+    idChargedIso:
+      Loose: "idLeadTkFinding > 0.5 && idChargedIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idChargedIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idChargedIso > 3.5"
+    idDecayModeNewDMs_idChargedIso:
+      Loose: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idChargedIso > 3.5"
+    idIso:
+      Loose: "idLeadTkFinding > 0.5 && idIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idIso > 3.5"
+    idDecayModeNewDMs_idIso:
+      Loose: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 0.5"
+      Medium: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 1.5"
+      Tight: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5 && idIso > 3.5"
+  denominators:
+    Base: "pt >= 20 && |eta| < 2.3"

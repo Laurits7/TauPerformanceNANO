@@ -13,6 +13,15 @@ OPERATORS = {
 class GeneralCut:
     """ Cuts based on string """
     def __init__(self, cut_string):
+        """ Initializes the string based cut class
+
+        Args:
+            cut_string : str
+                String containing all the cuts in a default convention
+
+        Returns:
+            None
+        """
         self.cut_string = cut_string
         self._all_cuts = []
         self.separate_cuts()
@@ -47,6 +56,8 @@ class Masks:
         self.cfg = cfg
         self.mask_type = mask_type
         self.obj_type = obj_type
+        self.eff_type = "eff" if obj_type == cfg.genTau else "fake"
+        self.denominator = True if mask_type == 'denominators' else False
         self._masks = {}
         self.base_mask = self.create_base_mask()
         self.create_masks()
@@ -60,11 +71,14 @@ class Masks:
         return wp_cuts
 
     def create_base_mask(self):
-        base_mask_str = self.cfg.TauID_eff[self.mask_type].Base
+        base_mask_str = self.cfg[f"TauID_{self.eff_type}"][self.mask_type].Base
         gc = GeneralCut(base_mask_str)
         total_mask = np.array([0] * len(self.events))
         for cut_ in gc.all_cuts:
-            var_name, abs_value = interpret_name(cut_[0], self.cfg)
+            var_name, abs_value = interpret_name(
+                                                cut_[0], self.cfg,
+                                                denominator=self.denominator,
+                                                obj_type=self.obj_type)
             value = float(cut_[2])
             if abs_value:
                 var_values = np.abs(self.events[var_name])
@@ -89,7 +103,10 @@ class Masks:
         total_mask = np.array([0] * len(self.events))
         for cut in wp_mask:
             value = float(cut[2])
-            var_name, abs_value = interpret_name(cut[0], self.cfg)
+            var_name, abs_value = interpret_name(
+                                                cut[0], self.cfg,
+                                                denominator=self.denominator,
+                                                obj_type=self.obj_type)
             if abs_value:
                 var_values = np.abs(self.events[var_name])
             else:
@@ -101,10 +118,10 @@ class Masks:
         return wp_mask
 
     def read_all_masks(self):
-        for mask in self.cfg.TauID_eff[self.mask_type]:
+        for mask in self.cfg[f"TauID_{self.eff_type}"][self.mask_type]:
             if not mask == 'Base':
                 self._masks[mask] = self.read_mask_type(
-                                       self.cfg.TauID_eff[self.mask_type][mask])
+                       self.cfg[f"TauID_{self.eff_type}"][self.mask_type][mask])
 
     @property
     def masks(self):
@@ -117,7 +134,7 @@ def interpret_name(name, cfg, denominator=False, obj_type=None):
     abs_value = False
     if denominator:
         name = f"{obj_type}_{name}"
-    if '@' not in name:
+    elif '@' not in name:
         name = f"{cfg.comparison_tau}_{name}"
     if '|' in name:
         abs_value = True

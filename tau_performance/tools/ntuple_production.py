@@ -44,6 +44,29 @@ def check_fake_suitability(
                     (ev.GenPart_statusFlags[ijet] >> 5 & 1)
                 )):
             suitable = False
+    else:
+        for gen_part_idx in range(event['nGenPart']):
+            if abs(event['GenPart_pdgId'][gen_part_idx]) not in [11, 13, 15]:
+                continue
+            if abs(event['GenPart_pt'][gen_part_idx]) < 15:
+                continue
+            if event['GenPart_status'][gen_part_idx] != 1:
+                continue
+            select_lep = ( (abs(event['GenPart_pdgId'][gen_part_idx]) in [11, 13]) and
+                          ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
+            select_tau = ( (abs(event['GenPart_pdgId'][gen_part_idx]) == 15) and
+                           (event['GenPart_statusFlags'][gen_part_idx] >> 1 & 1) and
+                          ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
+            if not (select_lep or select_tau):
+                continue
+            dR = pm.deltaR(
+                            event['GenPart_eta'][gen_part_idx],
+                            event['GenPart_phi'][gen_part_idx],
+                            event['GenJet_eta'][ref_idx],
+                            event['GenJet_phi'][ref_idx])
+            if dR < 0.3:
+                suitable = False
+                break
     return suitable
 
 
@@ -83,7 +106,7 @@ def pick_suitable_ref_objects(
     return good_ref_objects
 
 
-def fill_eff_ntuple(events: awkward.Array, cfg: DictConfig) -> None:
+def fill_eff_ntuple(events: awkward.Array, sample_type:str, cfg: DictConfig) -> None:
     """ Fills the tauID efficiency root file with the matched taus and
     gen taus so they are same length. If no tau is matched to genTau a value
     of -999 is assigned.
@@ -98,7 +121,9 @@ def fill_eff_ntuple(events: awkward.Array, cfg: DictConfig) -> None:
         None
     """
     ref_type = 'genTau'
-    output_path = os.path.join(cfg.output_dir, cfg.TauID_eff.data_file.path)
+    output_path = os.path.join(
+                                cfg.output_dir,
+                                cfg.TauID_eff.data_files[sample_type].path)
     eff_ntuple_file = uproot.recreate(output_path)
     all_vars = general.construct_var_names(cfg, ref_type)
     fill_entries = []
@@ -125,13 +150,14 @@ def fill_eff_ntuple(events: awkward.Array, cfg: DictConfig) -> None:
             fill_entries.append(fill_entry)
     res = {key: [] for key in all_vars}
     {res[key].append(sub[key]) for sub in fill_entries for key in sub}
-    eff_ntuple_file[cfg.TauID_eff.data_file.tree_path] = res
+    eff_ntuple_file[cfg.TauID_eff.data_files[sample_type].tree_path] = res
     return None
 
 
 def fill_fake_obj_ntuple(
         events: awkward.Array,
         fake_type: str,
+        sample_type: str,
         cfg: DictConfig) -> None:
     """ Fills the fake ntuple for a given fake background and for a given
     reference fake object.
@@ -148,16 +174,16 @@ def fill_fake_obj_ntuple(
         None
     """
     output_path = os.path.join(
-                cfg.output_dir, f"{fake_type}_{cfg.TauID_fake.data_file.path}")
+                cfg.output_dir, cfg.TauID_fake.data_files[sample_type].path)
     fakes_ntuple_file = uproot.recreate(output_path)
     all_vars = general.construct_var_names(cfg, fake_type)
     fill_entries = []
     for event in events:
         good_gen_taus = pick_suitable_ref_objects(event, cfg.genTau, 'genTau', cfg)
         good_ref_objects = pick_suitable_ref_objects(
-                                event, cfg.genTau, cfg.fakes[fake_type], cfg)
+                                event, cfg.fakes[fake_type], 'genJet', cfg)
         matched_ref_objects = pm.match_taus_to_refs(
-                                    good_ref_objects, event, cfg.genTau, cfg)
+                                    good_ref_objects, event, 'GenJet', cfg)
         matched_gen_taus = pm.match_taus_to_refs(
                                 good_gen_taus, event, cfg.genTau, cfg)
         for ref_idx in good_ref_objects:
@@ -181,12 +207,13 @@ def fill_fake_obj_ntuple(
             fill_entries.append(fill_entry)
     res = {key: [] for key in all_vars}
     {res[key].append(sub[key]) for sub in fill_entries for key in sub}
-    fakes_ntuple_file[cfg.TauID_eff.data_file.tree_path] = res
+    fakes_ntuple_file[cfg.TauID_eff.data_files[sample_type].tree_path] = res
     return None
 
 
 def fill_all_fake_ntuples(
         events: awkward.Array,
+        sample_type: str,
         cfg: DictConfig) -> None:
     """ Fills all the fake ntuples for the objects listed in configuration
 
@@ -199,5 +226,6 @@ def fill_all_fake_ntuples(
     Returns:
         None
     """
-    for fake_type in cfg.fakes:
-        fill_fake_obj_ntuple(events, fake_type, cfg)
+    # for fake_type in cfg.fakes:
+        # fill_fake_obj_ntuple(events, fake_type, cfg)
+    fill_fake_obj_ntuple(events, "genJet", sample_type, cfg)

@@ -102,9 +102,10 @@ def decay_mode_reconstruction(cfg: DictConfig) -> None:
         None
     """
     print("Started loading file")
-    input_path = os.path.join(cfg.output_dir, cfg.TauID_eff.data_file.path)
+    input_path = os.path.join(
+                        cfg.output_dir, cfg.TauID_eff.data_files.ggH_htt.path)
     events = general.load_events(
-        input_path, cfg.TauID_eff.data_file.tree_path)
+        input_path, cfg.TauID_eff.data_files.ggH_htt.tree_path)
     print("Finished loading file")
     truth_dms, comparison_dms = extract_matched_tau_decay_modes(events, cfg)
     conf_matrix = confusion_matrix(
