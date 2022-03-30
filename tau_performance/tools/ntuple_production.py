@@ -3,17 +3,18 @@ import uproot
 import awkward
 from omegaconf import DictConfig
 from collections import defaultdict
-from . import particle_matching as pm
-from . import general
+# from . import particle_matching as pm
+# from . import general
+from tau_performance.tools import particle_matching as pm
+from tau_performance.tools import general
 
-
-def check_fake_suitability(
+def check_pollution_from_non_jets(
         event: awkward.Array,
         ref_obj: str,
         ref_idx: int,
-        ref_type: str,
         cfg: DictConfig) -> list:
-    """ Picks only those fake objects that pass the quality cuts
+    """ Checks pollution from non-jets. Compares to genJet regardless of whether
+    RECO or GEN jets are used for tau-matching
 
     Args:
         events: awkward.Array
@@ -32,48 +33,35 @@ def check_fake_suitability(
             Whether or not the fake reference object satisfies the criteria
     """
     suitable = True
-    if ref_type == 'genElectron' or ref_type == 'genMuon':
-        ref_pdgid = event[f"{cfg.fakes[ref_type]}_pdgId"][ref_idx]
-        if abs(ref_pdgid) != 11 and ref_type == 'genElectron':
+    for gen_part_idx in range(event['nGenPart']):
+        if abs(event['GenPart_pdgId'][gen_part_idx]) not in [11, 13, 15]:
+            continue
+        if abs(event['GenPart_pt'][gen_part_idx]) < 15:
+            continue
+        if event['GenPart_status'][gen_part_idx] != 1:
+            continue
+        select_lep = ( (abs(event['GenPart_pdgId'][gen_part_idx]) in [11, 13]) and
+                      ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
+        select_tau = ( (abs(event['GenPart_pdgId'][gen_part_idx]) == 15) and
+                       (event['GenPart_statusFlags'][gen_part_idx] >> 1 & 1) and
+                      ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
+        if not (select_lep or select_tau):
+            continue
+        print(f"{event.nGenJet} and {event.Jet_genJetIdx[ref_idx]}")
+        dR = pm.deltaR(
+                        event['GenPart_eta'][gen_part_idx],
+                        event['GenPart_phi'][gen_part_idx],
+                        event['GenJet_eta'][ref_idx],
+                        event['GenJet_phi'][ref_idx])
+        if dR < 0.3:
             suitable = False
-        elif abs(ref_pdgid) != 13 and ref_type == 'genMuon':
-            suitable = False
-        if not ((ev.GenPart_statusFlags[ijet] >> 0 & 1) or
-                (
-                    (ev.GenPart_status[ijet] == 1) and
-                    (ev.GenPart_statusFlags[ijet] >> 5 & 1)
-                )):
-            suitable = False
-    else:
-        for gen_part_idx in range(event['nGenPart']):
-            if abs(event['GenPart_pdgId'][gen_part_idx]) not in [11, 13, 15]:
-                continue
-            if abs(event['GenPart_pt'][gen_part_idx]) < 15:
-                continue
-            if event['GenPart_status'][gen_part_idx] != 1:
-                continue
-            select_lep = ( (abs(event['GenPart_pdgId'][gen_part_idx]) in [11, 13]) and
-                          ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
-            select_tau = ( (abs(event['GenPart_pdgId'][gen_part_idx]) == 15) and
-                           (event['GenPart_statusFlags'][gen_part_idx] >> 1 & 1) and
-                          ( event['GenPart_statusFlags'][gen_part_idx] >> 0 & 1 ))
-            if not (select_lep or select_tau):
-                continue
-            dR = pm.deltaR(
-                            event['GenPart_eta'][gen_part_idx],
-                            event['GenPart_phi'][gen_part_idx],
-                            event['GenJet_eta'][ref_idx],
-                            event['GenJet_phi'][ref_idx])
-            if dR < 0.3:
-                suitable = False
-                break
+            break
     return suitable
 
 
 def pick_suitable_ref_objects(
         event: awkward.Array,
         ref_obj: str,
-        ref_type: str,
         cfg: DictConfig) -> list:
     """ Picks only those reference objects that pass the quality cuts
 
@@ -82,8 +70,6 @@ def pick_suitable_ref_objects(
             Event with all the branches
         ref_obj : str
             The object comparison tau to match to.
-        ref_type : str
-            Type of the reference object
         cfg : omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
 
@@ -97,135 +83,81 @@ def pick_suitable_ref_objects(
             continue
         if abs(event[f"{ref_obj}_eta"][ref_idx]) > cfg.quality_cuts.genTau.eta:
             continue
-        if not ref_type == 'genTau':
-            suitable = check_fake_suitability(
-                                        event, ref_obj, ref_idx, ref_type, cfg)
-            if not suitable:
-                continue
+        # if ref_obj != cfg.genTau:
+        #     if (event["Jet_genJetIdx"][ref_idx] < 0) or (event["Jet_genJetIdx"][ref_idx] >= event["nGenJet"]):
+        #         continue
+        #         print("___________________________---")
+        #         print(event["Jet_genJetIdx"][ref_idx])
+        #         print(event["nGenJet"])
+        #         print("___________________________---")
+        #     suitable = check_pollution_from_non_jets(
+        #                                 event, ref_obj, ref_idx, cfg)
+        #     if not suitable:
+        #         continue
         good_ref_objects.append(ref_idx)
     return good_ref_objects
 
 
-def fill_eff_ntuple(events: awkward.Array, sample_type:str, cfg: DictConfig) -> None:
-    """ Fills the tauID efficiency root file with the matched taus and
-    gen taus so they are same length. If no tau is matched to genTau a value
-    of -999 is assigned.
 
-    Args:
-        events : awkward.Array
-            All events with all the variables from the input ntuple
-        cfg : omegaconf.DictConfig
-            The configuration. Branch names are inferred from that.
-
-    Returns:
-        None
-    """
-    ref_type = 'genTau'
-    output_path = os.path.join(
-                                cfg.output_dir,
-                                cfg.TauID_eff.data_files[sample_type].path)
-    eff_ntuple_file = uproot.recreate(output_path)
-    all_vars = general.construct_var_names(cfg, ref_type)
-    fill_entries = []
-    for event in events:
-        good_gen_taus = pick_suitable_ref_objects(event, cfg.genTau, ref_type, cfg)
-        matched_gen_taus = pm.match_taus_to_refs(
-                                good_gen_taus, event, cfg.genTau, cfg)
-        for gen_tau_idx in good_gen_taus:
-            fill_entry = {var: -999 for var in all_vars}
-            for info_branch in cfg.allVariables.info:
-                fill_entry[info_branch] = event[info_branch]
-            for gen_var in cfg.allVariables.genTau:
-                gen_key = f"{cfg.genTau}_{gen_var}"
-                fill_entry[gen_key] = event[gen_key][gen_tau_idx]
-            if gen_tau_idx in matched_gen_taus:
-                matched_tau_idx = matched_gen_taus[gen_tau_idx]
-                for tau_var in cfg.allVariables.tau:
-                    tau_key = f"{cfg.comparison_tau}_{tau_var}"
-                    fill_entry[tau_key] = event[tau_key][matched_tau_idx]
-                best_match_jet_idx = event[f"{cfg.comparison_tau}_jetIdx"][matched_tau_idx]
-                if best_match_jet_idx >= 0:
-                    for jet_var in cfg.allVariables.jet:
-                        fill_entry[f"Jet_{jet_var}"] = event[f"Jet_{jet_var}"][best_match_jet_idx]
-            fill_entries.append(fill_entry)
-    res = {key: [] for key in all_vars}
-    {res[key].append(sub[key]) for sub in fill_entries for key in sub}
-    eff_ntuple_file[cfg.TauID_eff.data_files[sample_type].tree_path] = res
-    return None
-
-
-def fill_fake_obj_ntuple(
+def fill_ref_obj_ntuple(
         events: awkward.Array,
-        fake_type: str,
-        sample_type: str,
+        ref_obj: str,
+        sample_name: str,
         cfg: DictConfig) -> None:
-    """ Fills the fake ntuple for a given fake background and for a given
-    reference fake object.
+    """Foo bar baz baax
 
     Args:
         events : awkward.Array
             All events with all the variables from the input ntuple
-        fake_type : str
-            The type of fake to match to.
+        ref_object : str
+            The reference object for the matching
+        sample_name : str
+            Name of the sample to be ntupelized
         cfg : omegaconf.DictConfig
             The configuration. Branch names are inferred from that.
 
     Returns:
         None
     """
-    output_path = os.path.join(
-                cfg.output_dir, cfg.TauID_fake.data_files[sample_type].path)
-    fakes_ntuple_file = uproot.recreate(output_path)
-    all_vars = general.construct_var_names(cfg, fake_type)
+    if ref_obj != cfg.genTau:
+        data_file = cfg.TauID_fake.data_files[sample_name].path
+        tree_path = cfg.TauID_fake.data_files[sample_name].tree_path
+    else:
+        data_file = cfg.TauID_eff.data_files[sample_name].path
+        tree_path = cfg.TauID_eff.data_files[sample_name].tree_path
+    output_path = os.path.join(cfg.output_dir, data_file)
+    all_vars = general.construct_var_names(cfg, cfg.genTau)
+    opp_obj = cfg.genTau if ref_obj != cfg.genTau else cfg.fakes.recoJet
     fill_entries = []
     for event in events:
-        good_gen_taus = pick_suitable_ref_objects(event, cfg.genTau, 'genTau', cfg)
-        good_ref_objects = pick_suitable_ref_objects(
-                                event, cfg.fakes[fake_type], 'genJet', cfg)
+        good_ref_objects = pick_suitable_ref_objects(event, ref_obj, cfg)
+        good_opp_objects = pick_suitable_ref_objects(event, opp_obj, cfg)
         matched_ref_objects = pm.match_taus_to_refs(
-                                    good_ref_objects, event, 'GenJet', cfg)
-        matched_gen_taus = pm.match_taus_to_refs(
-                                good_gen_taus, event, cfg.genTau, cfg)
+                                        good_ref_objects, event, ref_obj, cfg)
+        matched_opp_objects = pm.match_taus_to_refs(
+                                        good_opp_objects, event, opp_obj, cfg)
         for ref_idx in good_ref_objects:
             fill_entry = {var: -999 for var in all_vars}
             for info_branch in cfg.allVariables.info:
                 fill_entry[info_branch] = event[info_branch]
-            for obj_var in cfg.allVariables[fake_type]:
-                fill_entry[f"{cfg.fakes[fake_type]}_{obj_var}"] = event[f"{cfg.fakes[fake_type]}_{obj_var}"][ref_idx]
+            for obj_var in cfg.allVariables[ref_obj]:
+                obj_key = f"{ref_obj}_{obj_var}"
+                fill_entry[obj_key] = event[obj_key][ref_idx]
             if ref_idx in matched_ref_objects:
                 matched_tau_idx = matched_ref_objects[ref_idx]
                 for tau_var in cfg.allVariables.tau:
-                    fill_entry[f"{cfg.comparison_tau}_{tau_var}"] = event[f"{cfg.comparison_tau}_{tau_var}"][matched_tau_idx]
-                if matched_tau_idx in matched_gen_taus.values():
-                    gen_tau_idx = list(
-                        matched_gen_taus.keys())[list(
-                            matched_gen_taus.values()
-                        ).index(matched_tau_idx)]
-                    for gen_var in cfg.allVariables.genTau:
-                        gen_key = f"{cfg.genTau}_{gen_var}"
-                        fill_entry[gen_key] = event[gen_key][gen_tau_idx]
+                    tau_key = f"{cfg.comparison_tau}_{tau_var}"
+                    fill_entry[tau_key] = event[tau_key][matched_tau_idx]
+                if matched_tau_idx in matched_opp_objects.values():
+                    matched_opp_obj_idx = list(
+                           matched_opp_objects.values()).index(matched_tau_idx)
+                    opp_obj_idx = list(matched_opp_objects.keys())[matched_opp_obj_idx]
+                    for opp_var in cfg.allVariables[opp_obj]:
+                        opp_obj_key = f"{opp_obj}_{opp_var}"
+                        fill_entry[opp_obj_key] = event[opp_obj_key][matched_opp_obj_idx]
             fill_entries.append(fill_entry)
     res = {key: [] for key in all_vars}
     {res[key].append(sub[key]) for sub in fill_entries for key in sub}
-    fakes_ntuple_file[cfg.TauID_eff.data_files[sample_type].tree_path] = res
+    with uproot.recreate(output_path) as ntuple_file:
+        ntuple_file[tree_path] = res
     return None
-
-
-def fill_all_fake_ntuples(
-        events: awkward.Array,
-        sample_type: str,
-        cfg: DictConfig) -> None:
-    """ Fills all the fake ntuples for the objects listed in configuration
-
-    Args:
-        events : awkward.Array
-            All events with all the variables from the input ntuple
-        cfg : omegaconf.DictConfig
-            The configuration. Branch names are inferred from that.
-
-    Returns:
-        None
-    """
-    # for fake_type in cfg.fakes:
-        # fill_fake_obj_ntuple(events, fake_type, cfg)
-    fill_fake_obj_ntuple(events, "genJet", sample_type, cfg)

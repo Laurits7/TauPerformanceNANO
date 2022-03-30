@@ -27,29 +27,24 @@ allVariables:
     - idChargedIso
     - idDecayModeNewDMs
     - idLeadTkFinding
-  genTau:
+  GenVisTau:
     - pt
     - eta
     - phi
     - mass
     - charge
     - status
-  jet:
+  Jet:
     - pt
     - eta
     - phi
     - mass
-  genElectron:
+  GenParticle:
     - pt
     - eta
     - phi
     - mass
-  genMuon:
-    - pt
-    - eta
-    - phi
-    - mass
-  genJet:
+  GenJet:
     - pt
     - eta
     - phi

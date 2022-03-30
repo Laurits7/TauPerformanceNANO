@@ -1,0 +1,8 @@
+comparisons:
+  baseline_tau: tallinnTau
+  eff_file:
+    path: "/home/laurits/tmp/classification/produceTallinnTaus_ggH_htt_dnn_2022Mar25_classification_NANOAODSIM.root"
+    sample_name: "ggH_htt"
+  fakes_file:
+    sample_name: "QCD"
+    path: "/home/laurits/tmp/classification/produceTallinnTaus_qcd_dnn_2022Mar25_classification_NANOAODSIM.root"
