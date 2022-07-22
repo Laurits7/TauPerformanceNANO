@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from omegaconf import DictConfig, OmegaConf
 
 
-
 def plot_efficiencies(efficiencies, eff_type, ref_obj, cfg):
     eff_full_name = "Efficiencies" if eff_type == 'eff' else "Fake Rate"
     main_output_dir = os.path.join(cfg.output_dir, eff_full_name)
@@ -15,6 +14,10 @@ def plot_efficiencies(efficiencies, eff_type, ref_obj, cfg):
         var_name = f"{ref_obj}_{tau_var.name}"
         var_output_dir = os.path.join(main_output_dir, var_name)
         os.makedirs(var_output_dir, exist_ok=True)
+        if len(efficiencies[var_name][0].keys()) == 1:
+            plot_all_id_on_one(
+                                efficiencies, var_name, var_output_dir, eff_full_name,
+                                tau_var.x_range, cfg, var_output_dir)
         for tau_id_key in efficiencies[var_name]:
             plot_efficiency(
                             efficiencies[var_name][tau_id_key],
@@ -36,6 +39,27 @@ def plot_efficiencies(efficiencies, eff_type, ref_obj, cfg):
                             var_output_dir,
                             eff_full_name,
                             cfg)
+
+
+def plot_all_id_on_one(
+        efficiencies, var_name, var_output_dir, eff_type, x_range, cfg, output_dir
+):
+    fig, ax = plt.subplots(figsize=(12,12))
+    hep.style.use(hep.style.ROOT)
+    hep.cms.label(f": {var_name}", data=False)
+    for tau_id_key in efficiencies[var_name]:
+        efficiency_histogram = efficiencies[var_name][tau_id_key]["Default"]
+        plt.plot(
+            efficiency_histogram.bin_centers, efficiency_histogram.binned_data,
+            label=tau_id_key, marker="v", markersize=12, lw=3)
+    plt.xlabel(var_name, fontdict={'size': 20})
+    plt.ylabel(eff_type, fontdict={'size': 20})
+    plt.xlim(x_range)
+    plt.grid()
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.9))
+    output_path = os.path.join(output_dir, f"{var_name}.png")
+    plt.savefig(output_path, bbox_inches='tight')
+    plt.close('all')
 
 
 def plot_eff_reco_histos(efficiencies, eff_type, cfg):
@@ -83,10 +107,9 @@ def plot_efficiency(
     hep.style.use(hep.style.ROOT)
     hep.cms.label(f": {iso_tau_id}", data=False)
     for wp_key, entry in efficiency_histograms.items():
-        bin_width = entry[1][1] - entry[1][0]
-        new_bins = np.array([bin_ + bin_width for bin_ in entry[1][:-1]])
         plt.plot(
-            new_bins, entry[0], label=wp_key, marker="v", markersize=12, lw=3)
+            entry.bin_centers, entry.binned_data,
+            label=wp_key, marker="v", markersize=12, lw=3)
     plt.xlabel(var_name, fontdict={'size': 20})
     plt.ylabel(eff_type, fontdict={'size': 20})
     plt.xlim(x_range)

@@ -33,10 +33,10 @@ class Efficiency:
         for tau_var in self.cfg[f"TauID_{self.eff_type}"].variables.genTau:
             var_name = f"{self.ref_obj}_{tau_var.name}"
             self._efficiencies[var_name] = self.calculate_id_efficiencies(
-                                                        var_name, tau_var.bins)
+                                            var_name, np.array(tau_var.bins))
         for other_var in self.cfg[f"TauID_{self.eff_type}"].variables.other:
             self._efficiencies[other_var.name] = self.calculate_id_efficiencies(
-                                                other_var.name, other_var.bins)
+                                    other_var.name, np.array(other_var.bins))
         for reco_var in self.cfg[f"TauID_{self.eff_type}"].variables.recoTau:
             var_name = f"{self.comparison_tau}_{reco_var.name}"
             self._reco_eff[var_name] = {}
@@ -57,16 +57,13 @@ class Efficiency:
         total_efficiency = []
         all_entries = self.events[var_name].to_numpy()
         tau_entries = all_entries[self.denominator]
-        h_gen = np.histogram(tau_entries, bins=bins)[0]
+        h_gen = general.Histogram(tau_entries, bins, "Denominator")
         for wp_numerator_key in wp_numerators:
             full_mask = self.denominator & wp_numerators[wp_numerator_key]
             cleaned_comparison = all_entries[full_mask]
             total_efficiency.append(len(cleaned_comparison)/len(tau_entries))
-            h_cleaned = np.histogram(cleaned_comparison, bins=bins)[0]
-            h_eff = h_cleaned/h_gen
-            h_eff = np.nan_to_num(
-                            h_eff, copy=True, nan=0.0, posinf=None, neginf=None)
-            efficiency_histograms[wp_numerator_key] = (h_eff, bins)
+            h_cleaned = general.Histogram(cleaned_comparison, bins, 'Numerator')
+            efficiency_histograms[wp_numerator_key] = h_cleaned/h_gen
         return efficiency_histograms, total_efficiency
 
     def calculate_reco_efficiencies(self, var_name, bins):

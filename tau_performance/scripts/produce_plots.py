@@ -9,7 +9,12 @@ from tau_performance.tools import plot_roc_curve as prc
 import os
 
 
-
+def infer_input_path_and_tree(ref_obj, sample_name, cfg):
+    eff_type = "eff" if ref_obj == cfg.genTau else "fake"
+    file_name = cfg[f"TauID_{eff_type}"].data_files[sample_name].path
+    tree_path = cfg[f"TauID_{eff_type}"].data_files[sample_name].tree_path
+    path = os.path.join(cfg.output_dir, file_name)
+    return path, tree_path
 
 @hydra.main(config_path='../config', config_name='config')
 def main(cfg: DictConfig) -> None:
@@ -20,7 +25,10 @@ def main(cfg: DictConfig) -> None:
 
 
     ################### EFFICIENCY ###################
-    eff = Efficiency('ggH_htt', cfg.genTau, cfg)
+    eff_input_path, eff_tree_path = infer_input_path_and_tree(cfg.genTau, 'ggH_htt', cfg)
+    eff = Efficiency(
+                    'ggH_htt', cfg.comparison_tau, eff_input_path,
+                    eff_tree_path, cfg.genTau, cfg)
     efficiencies = eff.efficiencies
     eff_reco_histos = eff.reco_histos
     eff_obj = cfg.genTau
@@ -29,7 +37,9 @@ def main(cfg: DictConfig) -> None:
 
 
     ################### FAKE RATES ###################
-    fake = Efficiency('QCD', cfg.fakes.recoJet, cfg)
+    fake_input_path, fake_tree_path = infer_input_path_and_tree(cfg.fakes.recoJet, 'QCD', cfg)
+    fake = Efficiency('QCD', cfg.comparison_tau, fake_input_path,
+                    fake_tree_path, cfg.fakes.recoJet, cfg)
     fake_rates = fake.efficiencies
     fake_reco_histos = fake.reco_histos
     fake_obj = cfg.fakes.recoJet
@@ -43,8 +53,7 @@ def main(cfg: DictConfig) -> None:
 
 
     ###################   ROC   ###################
-    qcd_eff = Efficiency('QCD', cfg.fakes.recoJet, cfg)
-    qcd_total_fakerates = qcd_eff.total_efficiencies
+    qcd_total_fakerates = fake.total_efficiencies
     htt_total_eff = eff.total_efficiencies
     prc.plot_roc_curve(htt_total_eff, qcd_total_fakerates, cfg)
 

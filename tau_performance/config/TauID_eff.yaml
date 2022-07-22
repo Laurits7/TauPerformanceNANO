@@ -26,11 +26,20 @@ TauID_eff:
         x_range: [50, 80]
         bins: [52, 55, 58, 61, 64, 67, 70, 73, 76, 79]
   numerators:
-    Base: "pt >= 20 && |eta| < 2.3"
-    idLeadTkFinding_bare:
+    # Base: "pt >= 20 && |eta| < 2.3"
+    Base: "pt >= 0"
+    leadTrackFinding:
       Default: idLeadTkFinding > 0.5
-    idDecayModeNewDMs:
-      Default: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5"
+    leadTrackFinding_pt_eta:
+      Default: "idLeadTkFinding > 0.5 && pt >= 20 && |eta| < 2.3"
+    leadTrackFinding_pt_eta_chIso:
+      Default: "idLeadTkFinding > 0.5 && pt >= 20 && |eta| < 2.3 && chargedIso < 2"
+    leadTrackFinding_pt_eta_rawIso:
+      Default: "idLeadTkFinding > 0.5 && pt >= 20 && |eta| < 2.3 && rawIso < 2"
+    # idLeadTkFinding_bare:
+    #   Default: idLeadTkFinding > 0.5
+    # idDecayModeNewDMs:
+    #   Default: "idLeadTkFinding > 0.5 && idDecayModeNewDMs > 0.5"
     idChargedIso:
       Loose: "idLeadTkFinding > 0.5 && idChargedIso > 0.5"
       Medium: "idLeadTkFinding > 0.5 && idChargedIso > 1.5"
