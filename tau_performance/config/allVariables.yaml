@@ -1,0 +1,51 @@
+allVariables:
+  info:
+    - run
+    - luminosityBlock
+    - event
+    - Pileup_nTrueInt
+  tau:
+    - pt
+    - eta
+    - phi
+    - mass
+    - charge
+    - decayMode
+    - chargedIso
+    - leadTkDeltaEta
+    - leadTkDeltaPhi
+    - leadTkPtOverTauPt
+    - neutralIso
+    - photonsOutsideSignalCone
+    - puCorr
+    - rawIso
+    - genPartIdx
+    - genPartFlav
+    - rawIso
+    - jetIdx
+    - idIso
+    - idChargedIso
+    - idDecayModeNewDMs
+    - idLeadTkFinding
+  GenVisTau:
+    - pt
+    - eta
+    - phi
+    - mass
+    - charge
+    - status
+  Jet:
+    - pt
+    - eta
+    - phi
+    - mass
+  GenParticle:
+    - pt
+    - eta
+    - phi
+    - mass
+  GenJet:
+    - pt
+    - eta
+    - phi
+    - mass

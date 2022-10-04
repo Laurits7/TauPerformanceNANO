@@ -2,34 +2,39 @@
 
 ## Setup
 
-Clone this repository:
+Clone this repository & enter the directory:
 
-    git clone https://github.com/rmanzoni/TauPerformanceNANO.git
+```bash
+git clone https://github.com/rmanzoni/TauPerformanceNANO.git
+cd TauPerformanceNANO
+```
+
+Make sure you are using python3 and then create a virtual environment and activate it:
+```bash
+python -m venv tauID_env
+source tauID_env/bin/activate
+```
+
+Install the necessary packages and this package itself:
+
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+
+Now every time you wish to use this package activate the virtual environment:
+
+```bash
+source tauID_env/bin/activate
+```
 
 ## Running
 
-First, get the nanoAOD root files zou want to use and copy them to any local directory. The script `CopyToMyEOS.py` may be of help, after you change the path to where the samples should be copied to. The samples are read from DAS.
+The configuration files are all stored in the tau_preformance/config directory. The config files are read in by [hydra](https://hydra.cc/docs/advanced/override_grammar/basic/). Configuration parameters can be overriden on the command line as shown also in Hydra tutorials.
 
-Next, produce the ntuple. This is done using `ProduceNtuple.py`. Required arguments include:
-* `--file`: Directory containing the sample aquired in the previous step
-* `--output`: Output root file name
-* `--eff`/`--fake`: Specify either if your samples contain either true Taus or fake Taus
+So when we want to change output directory and the tau that we are evaluating:
 
-Example:
-
-    python ProduceNtuple.py --file ZTT_nanorootfiles --output nano_ztt.root --eff
-
-Now you can make the plots. Just run either `Eff_plot.py` or `Fake_plot.py` and add the ntuple rootfile as an argument. You can compare the efficiencies or fake rate of multiple ntuples by adding all of them as arguments. This will produce plots for each working point.
-
-Example:
-
-    python Eff_plot.py nano_ztt.root
-    python Eff_plot.py nano_ztt.root nano_tentau.root
-
-The scripts `Response_plot.py` can be used in the same manner. For `Roc_plot.py`, ntuples for real Taus and fake Taus are needed. Give the ntuple for the efficiency sample first, then for the fake sample. You can also add more ROC curves into the same plots by again adding another efficiency- and fake ntuple.
-
-Example:
-
-    python Roc_plot.py nano_ztt.root nano_ttbar.root
-    python Roc_plot.py nano_ztt.root nano_ttbar.root nano_ztt.root nano_qcd.root
-
+```bash
+python produce_plots.py output_dir=/home/user/tmp/HPSTau comparison_tau=Tau
+```

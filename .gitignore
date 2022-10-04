@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+sftp-config.json
+tauID_env
+outputs
